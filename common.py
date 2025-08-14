@@ -5,32 +5,25 @@ from typing import Optional
 @dataclass
 class OrderData:
     """
-    用于存储从JSON中解析出的单个订单的完整信息。
-    假设一个订单只包含一个商品。
-    所有字段都设为可选，以增强程序的健-健壮性。
+    用于存储单个订单的核心信息，以生成最终的Excel报告。
+    所有非必需字段都设为可选，以增强程序的健壮性。
     """
-    # 核心ID和URL
-    order_id: Optional[str] = None
-    order_detail_url: Optional[str] = None
+    # 核心ID
+    order_id: str  # 订单号，我们假设这个是必填的
 
-    # 状态和金额
+    # 订单状态与金额
     order_status: Optional[str] = None
-    total_price: Optional[float] = None
+    total_price: Optional[float] = None  # 实付金额
 
-    # 时间信息
-    creation_time: Optional[str] = None
-    payment_time: Optional[str] = None
+    # 时间信息 (根据订单状态，可能为空)
+    creation_time: Optional[str] = None  # 下单时间
+    payment_time: Optional[str] = None  # 付款时间
     shipping_time: Optional[str] = None  # 发货时间
 
-    # 店铺信息
-    shop_name: Optional[str] = None
+    # --- 以下是辅助字段，用于爬虫流程，但不会直接导出到最终Excel的核心列 ---
 
-    # --- 商品信息 (直接作为主类属性) ---
-    item_title: Optional[str] = None
-    item_sku: Optional[str] = None  # 商品规格，例如 "黑色; 42码"
-    item_price: Optional[float] = None  # 商品单价
-    item_quantity: Optional[int] = None  # 商品数量 (虽然总是一个，但保留此字段是好习惯)
-    item_img_url: Optional[str] = None  # 商品主图的URL
+    # 用于截图的详情页URL
+    order_detail_url: Optional[str] = None
 
-    # 截图在本地的保存路径
+    # 截图在本地的临时保存路径
     screenshot_path: Optional[str] = None
