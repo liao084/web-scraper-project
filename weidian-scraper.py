@@ -103,7 +103,7 @@ class WeidianScraper:
             try:
                 self.driver.get(order.order_detail_url)
                 main_container = self.wait.until(EC.visibility_of_element_located((By.XPATH, main_container_xpath)))
-                self.driver.execute_script("document.body.style.zoom='80%'")
+                self.driver.execute_script("document.body.style.zoom='40%'")
                 time.sleep(1.5)  # 增加等待时间确保缩放和渲染完成
 
                 # 1. 截取父容器
@@ -190,7 +190,7 @@ class WeidianScraper:
             initial_orders = self._parse_response(initial_request)
             discovered_orders.extend(initial_orders)
             for i in range(clicks_to_perform):
-                print(f"\n--- 正在加载第 {i + 2} 页... ---")
+                print(f"\n--- 正在加载第 {i + 1} 页... ---")
                 button_selector = (By.CSS_SELECTOR, "div.order_add_list .more_span")
                 load_more_button = self.wait.until(EC.element_to_be_clickable((button_selector)))
                 self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", load_more_button)
@@ -214,8 +214,8 @@ if __name__ == "__main__":
     # 1. 在程序开始时记录时间
     start_time = time.time()
 
-    MY_COOKIE = ("__spider__visitorid=2ef09da5a6200925; smart_login_type=0; hi_dxh=; hold=; cn_merchant=; token=; isLogin=; loginUserType=; loginUserSource=; WD_b_id=; WD_b_wduss=; WD_b_country=; WD_b_tele=; WD_s_id=; WD_s_tele=; WD_s_wduss=; WD_seller=; is_login=true; login_type=LOGIN_USER_TYPE_MASTER; login_source=LOGIN_USER_SOURCE_MASTER; uid=1914883825; duid=1914883825; sid=1798256885; wdtoken=58ed060c; __spider__sessionid=2584a22f42a4db8a; login_token=_EwWqqVIQD0u47mFa1wCctnrLcWiA3ZQaBijugH_WeK9ovMUam2aWW1xg1j8s9jLx25qxxOGDQPyK2ZR1QKKtoYFtppFGSj2MXLO9shg_IsiM0vFPNszXRVyLhYcC9yY2V_slrb8-HglH4CsvQRGQUrYBAJeGp7CYAdDL5Bkdvxd_Yj1x0vVr9QEt0Tqgh18433yDSEoGB-y3L5vAKKLVDDcyWDwqlBk1lhddJKxnecFuUx5g6VnlhG0zDoHL7SIlOUPrT3ql; v-components/clean-up-advert@private_domain=1736676582; v-components/clean-up-advert@wx_app=1736676582")  # 请替换为您的有效Cookie
-    CLICKS_TO_PERFORM = 10  # 先设置为0，测试10条
+    MY_COOKIE = ("__spider__sessionid=0762cecbb607048d; __spider__visitorid=10bfef0417a79d8f; duid=1914883825; is_login=true; login_source=LOGIN_USER_SOURCE_MASTER; login_token=_EwWqqVIQGFzd9-vhOd3b9Lf663rhm-zysJxJXXI8z5lI2GEKtv162hjqldKPzW9lFfzc1OxtgQPUuzkD48Snb6I1i8kKFXF3yt5ef59yjsTwIoqDUTLEVV4Ujp6SfmJidBPDYSVfWPyHUYokzOp1hdPRtAyUojj2dypHJIXxl4fnOeA-gyZ8_MBN0mqS2CYlQpi2paZbwAKK362XmYswlz22qt54pRnChn4mhZ6DcURjUaat_Ur4BFNFqL6tLviJL3uNxAE2; login_type=LOGIN_USER_TYPE_MASTER; sid=1798256885; smart_login_type=0; uid=1914883825; is_follow_mp=0; wdtoken=00d03344")  # 请替换为您的有效Cookie
+    CLICKS_TO_PERFORM = 600  # 先设置为0，测试10条
 
     scraper = WeidianScraper()
     try:
