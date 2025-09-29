@@ -35,12 +35,12 @@ def create_excel_report(orders_data: List[Dict], filename: str):
 
     # 对DataFrame进行重排和重命名，以符合最终报告的格式要求
     df = df[[
-        'order_id', 'item_title', 'item_sku_title', 'order_status',
+        'order_id', 'shop_name', 'item_title', 'item_sku_title', 'order_status',
         'sub_order_desc', 'total_price', 'creation_time', 'payment_time',
         'screenshot_path'
     ]]
     df.rename(columns={
-        'order_id': '订单号', 'item_title': '商品名称', 'item_sku_title': '商品规格',
+        'order_id': '订单号', 'shop_name': '店铺名称', 'item_title': '商品名称', 'item_sku_title': '商品规格',
         'order_status': '订单状态', 'sub_order_desc': '订单退款状态',
         'total_price': '实付金额', 'creation_time': '下单时间',
         'payment_time': '付款时间', 'screenshot_path': '_截图路径'
@@ -68,25 +68,23 @@ def create_excel_report(orders_data: List[Dict], filename: str):
     })
 
     # --- 应用格式 ---
-    worksheet.write_row(0, 0, df.columns, header_format)
     worksheet.set_column('A:A', 25, cell_format)
-    worksheet.set_column('B:B', 40, cell_format)
-    worksheet.set_column('C:E', 20, cell_format)
-    worksheet.set_column('F:F', 15, cell_format)
-    worksheet.set_column('G:H', 18, date_format) # 对日期列应用特殊格式
-    worksheet.set_column('I:I', 25, cell_format)
-    worksheet.write('J1', '订单截图', header_format)
-    worksheet.set_column('J:J', 95)
+    worksheet.set_column('B:B', 30, cell_format)
+    worksheet.set_column('C:C', 40, cell_format)
+    worksheet.set_column('D:F', 20, cell_format)
+    worksheet.set_column('G:G', 15, cell_format)
+    worksheet.set_column('H:I', 18, date_format)
+    worksheet.set_column('J:J', 25, cell_format)
+    worksheet.write('K1', '订单截图', header_format)
+    worksheet.set_column('K:K', 95)
 
     # 循环遍历已完成的订单，插入对应的截图
     for index, order in enumerate(orders_data):
         row_num = index + 1
-        # 设置合适的行高以容纳图片
         worksheet.set_row(row_num, 400)
         screenshot_path = order.get('screenshot_path')
         if screenshot_path and os.path.exists(screenshot_path):
-            worksheet.insert_image(row_num, 9, screenshot_path, {'object_position': 1})
-
+            worksheet.insert_image(row_num, 10, screenshot_path, {'object_position': 1})
     writer.close()
     print(f"✅ Excel报告 '{filename}' 已成功生成！")
 

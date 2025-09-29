@@ -13,11 +13,16 @@ from typing import List, Dict
 from PIL import Image, ImageChops
 from playwright.async_api import async_playwright, Browser, Page
 
+# dotenv: 用于从 `.env` 文件中加载环境变量，实现了配置与代码的分离。
+from dotenv import load_dotenv
+
 import database_async
 
 # ==================== 用户配置区 ====================
-MY_COOKIE = (
-    "__spider__sessionid=ef3997be4428ba9d; __spider__visitorid=10bfef0417a79d8f; duid=1914883825; is_login=true; login_source=LOGIN_USER_SOURCE_MASTER; login_token=_EwWqqVIQE2N06kdIz32xuGZsehJK5eq-1LQj5vmNfErWalivWh_oWSifNF-5O_Z2aLEV99_L8Wwukt5DGOp-GvKKBFuISj55JL9yUUrcSQcS4Khx-AaHjkpgA67O7pMLxPYOn8UsyTbW65wJL4hPyRHI3EiFUwXNjI-_KVuJTm78OHvC_MQvasf6X_rdR7xRstxCXSEoxlfJ21EnDLO9-wkO0yYX_UIx-v2vN0VIjRcjIvy6CfJPi4AFc7wtEH7I7UWHEept; login_type=LOGIN_USER_TYPE_MASTER; sid=1798256885; smart_login_type=0; uid=1914883825; wdtoken=075e7b03")
+load_dotenv()
+print("正在从 .env 文件加载配置...")
+
+MY_COOKIE = os.getenv("MY_COOKIE")
 
 # 并发worker数量，建议根据CPU核心数和内存大小进行调整
 WORKER_COUNT = 6

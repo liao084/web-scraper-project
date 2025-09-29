@@ -5,6 +5,7 @@ from typing import Optional
 @dataclass
 class OrderData:
     order_id: str
+    shop_name: Optional[str] = None
     item_title: Optional[str] = None
     item_sku_title: Optional[str] = None
     order_status: Optional[str] = None

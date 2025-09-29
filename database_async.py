@@ -22,6 +22,7 @@ async def initialize_database():
                          (
                              id INTEGER PRIMARY KEY AUTOINCREMENT,
                              order_id TEXT NOT NULL,
+                             shop_name TEXT,
                              item_title TEXT,
                              item_sku_title TEXT,
                              order_status TEXT,
@@ -58,15 +59,15 @@ async def insert_orders(orders_data: List[Dict]) -> int:
         changes_before = db.total_changes
 
         insert_query = '''
-                       INSERT OR IGNORE INTO orders (order_id, item_title, item_sku_title, order_status, sub_order_desc,
+                       INSERT OR IGNORE INTO orders (order_id, shop_name, item_title, item_sku_title, order_status, sub_order_desc,
                                            total_price, creation_time, payment_time, shipping_time, order_detail_url,
                                            status)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
                        '''
 
         data_to_insert = [
             (
-                o.get("order_id"), o.get("item_title"), o.get("item_sku_title"),
+                o.get("order_id"), o.get("shop_name"),o.get("item_title"), o.get("item_sku_title"),
                 o.get("order_status"), o.get("sub_order_desc"),
                 o.get("total_price"), o.get("creation_time"),
                 o.get("payment_time"), o.get("shipping_time"), o.get("order_detail_url")

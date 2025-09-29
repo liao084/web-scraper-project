@@ -18,8 +18,8 @@ from common import OrderData
 
 # ==================== 用户配置区 ====================
 MY_COOKIE = (
-    "duid=1914883825; is_login=true; login_source=LOGIN_USER_SOURCE_MASTER; login_token=_EwWqqVIQLvBVw8XlxSK9YoRu9e6ssciBIaJwYK4xAQ573iLS1iY2gi2QzRYVJSyUA06U9NdMs2sSVvsCkBzK2CkBOCsIhE1jEwfdwEkeFgeB2PaLEzqN2bxGgz6Sm352gMcUnfFk3HsgW5NtWhNmPAdLSo90I1oJ5_xPLOHjMmYXhsa1NmE0NFhawSm2U7IyY_FJNdFjCeM4oVO4kRdMUD7tajw8OvoMHX6EUPsQQXxxEJBFkleSc5ellTUuZHfWwlc9lR3l; login_type=LOGIN_USER_TYPE_MASTER; sid=1798256885; smart_login_type=0; uid=1914883825; __spider__sessionid=ef3997be4428ba9d; __spider__visitorid=10bfef0417a79d8f; wdtoken=075e7b03")
-CLICKS_TO_PERFORM = 199
+    "wdtoken=b700990a; __spider__visitorid=b32bd2948c71ccba; __spider__sessionid=f07f9182f8d35056; login_token=_EwWqqVIQFrYy3oczxQdlxhC841fICvtvder0hnWvKHxii8dqKfX_5hQ_qijjh9Z5F3qD6sVVRHnXidbTYuhip1zKRmbuq1EgRZ66YXW8ZxZyWGsaBh13ADEkhXCYdq6rPNPg3nYJ56bpMwEWYLyuD4AuBQSq85SG2wXlJg80anK3ivJxI8x4oA8Nl-qbbXJG9rzgZna0jHjvRsJI1JylimZYBO-2qCYaz8qZSqnQ0x5UXSwL9REV8CMIwMG4dMQyRgekSXp-; is_login=true; login_type=LOGIN_USER_TYPE_MASTER; login_source=LOGIN_USER_SOURCE_MASTER; uid=1914883825; duid=1914883825; sid=1798256885; smart_login_type=0")
+CLICKS_TO_PERFORM = 2999
 TARGET_URL = "https://weidian.com/user/order/list.php?type=0"
 # ====================================================
 
@@ -36,6 +36,7 @@ class WeidianCollectorAsync:
         self.total_discovered = 0
         self.total_inserted = 0
         self.active_parsers = set()
+        self.new_page_processed = asyncio.Event()
 
     def _parse_cookie_string(self, cookie_string: str) -> List[Dict]:
         """
@@ -76,6 +77,7 @@ class WeidianCollectorAsync:
                     sub_order = order_dict.get("sub_orders", [{}])[0]
                     order_data = OrderData(
                         order_id=order_dict.get("order_id"),
+                        shop_name=order_dict.get("shop_name"),
                         item_title=sub_order.get("item_title"),
                         item_sku_title=sub_order.get("item_sku_title"),
                         order_status=order_dict.get("status_desc"),
@@ -93,6 +95,8 @@ class WeidianCollectorAsync:
                 self.total_discovered += len(orders_list)
                 self.total_inserted += inserted_count
                 print(f"  > [Handler] ✅ 成功解析，发现 {len(orders_list)} 条订单，新存入 {inserted_count} 条。")
+
+                self.new_page_processed.set()
 
         except Exception as e:
             print(f"  - ❌ [Handler] 解析或保存订单时发生错误: {e}")
@@ -142,23 +146,23 @@ class WeidianCollectorAsync:
             try:
                 for i in range(clicks_to_perform):
                     print(f"\n--- 第 {i + 1}/{clicks_to_perform} 次点击 '加载更多' ---")
-                    load_more_button = page.locator('xpath=//div[contains(@class, "more_span")]')
-                    await load_more_button.wait_for(state='visible', timeout=15000)
+                    load_more_button = page.locator('xpath=//*[@id="app"]/div[4]/div/div')
+                    # await load_more_button.wait_for(state='visible', timeout=15000)
 
-                    order_items_locator = page.locator('xpath=//*[@id="app"]/div[3]/ul/li')
-                    count_before_click = await order_items_locator.count()
-                    print(f"  > 点击前，页面共有 {count_before_click} 条订单。")
+                    # --- START OF MODIFICATION ---
 
-                    await load_more_button.click()
+                    # 1. 在点击前，先“放下”信号旗
+                    self.new_page_processed.clear()
 
-                    # 采用最健壮的等待方式：等待页面上订单数量确实增加。
-                    # 这是基于“结果”的等待，比等待固定时间或网络状态更可靠。
-                    await page.wait_for_function(
-                        f"document.evaluate('//*[@id=\"app\"]/div[3]/ul/li', document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null).snapshotLength > {count_before_click}",
-                        timeout=20000
-                    )
-                    count_after_click = await order_items_locator.count()
-                    print(f"  > ✅ 加载成功！现在页面共有 {count_after_click} 条订单。")
+                    # 2. 执行点击
+                    print("  > 正在执行JS强制点击...")
+                    await load_more_button.dispatch_event('click')
+
+                    # 3. 等待后台处理器“举起”信号旗
+                    # 这意味着新一页的数据已经被成功捕获和处理
+                    print("  > 等待新一页数据处理完成...")
+                    await self.new_page_processed.wait()
+                    print(f"  > ✅ 数据已同步！当前共处理 {self.total_inserted} 条新订单。")
 
             except Exception as e:
                 print(f"\n✅ '加载更多'循环结束。可能已到达末页或超时。原因: {type(e).__name__}")
